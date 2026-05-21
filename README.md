@@ -1,110 +1,68 @@
-# Data Science Project Boilerplate
+# NYC Airbnb Price EDA
 
-This boilerplate is designed to kickstart data science projects by providing a basic setup for database connections, data processing, and machine learning model development. It includes a structured folder organization for your datasets and a set of pre-defined Python packages necessary for most data science tasks.
+> Exploratory data analysis on New York City Airbnb listings — identifying the features that most influence listing price across all five boroughs.
 
-## Structure
+---
 
-The project is organized as follows:
+## Problem
 
-- **`src/app.py`** → Main Python script where your project will run.
-- **`src/explore.ipynb`** → Notebook for exploration and testing. Once exploration is complete, migrate the clean code to `app.py`.
-- **`src/utils.py`** → Auxiliary functions, such as database connection.
-- **`requirements.txt`** → List of required Python packages.
-- **`models/`** → Will contain your SQLAlchemy model classes.
-- **`data/`** → Stores datasets at different stages:
-  - **`data/raw/`** → Raw data.
-  - **`data/interim/`** → Temporarily transformed data.
-  - **`data/processed/`** → Data ready for analysis.
+What factors drive the price of an Airbnb listing in New York City? This project performs a structured, end-to-end EDA on the NYC Airbnb Open Data to answer that question — cleaning the data, exploring distributions and relationships, handling outliers, and delivering a feature-selected dataset ready for downstream modeling.
 
+## Dataset
 
-## ⚡ Initial Setup in Codespaces (Recommended)
+- **Source:** [NYC Airbnb Open Data](https://www.kaggle.com/datasets/dgomonov/new-york-city-airbnb-open-data) — Kaggle
+- **Key features analyzed:** `neighbourhood_group`, `neighbourhood`, `room_type`, `price`, `minimum_nights`, `number_of_reviews`, `calculated_host_listings_count`, `availability_365`
+- **Dropped at cleaning:** `id`, `name`, `host_name`, `last_review`, `reviews_per_month` — not relevant to price prediction
+- **Target variable:** `price`
 
-No manual setup is required, as **Codespaces is automatically configured** with the predefined files created by the academy for you. Just follow these steps:
+## Approach
 
-1. **Wait for the environment to configure automatically**.
-   - All necessary packages and the database will install themselves.
-   - The automatically created `username` and `db_name` are in the **`.env`** file at the root of the project.
-2. **Once Codespaces is ready, you can start working immediately**.
+**Step 1 — Data cleaning**
+Verified zero duplicate IDs and zero null values across all retained columns. Dropped five irrelevant identifier and metadata columns.
 
+**Step 2 — Univariate analysis**
+Plotted histograms and boxplots for all numerical features (`price`, `minimum_nights`, `number_of_reviews`, `calculated_host_listings_count`) and count distributions for categorical features (`neighbourhood_group`, `room_type`).
 
-## 💻 Local Setup (Only if you can't use Codespaces)
+**Step 3 — Multivariate analysis**
+Built regression plots and pairwise correlation heatmaps for numerical features against price. Plotted room type counts broken down by borough. Factorized categorical columns and generated a full feature correlation heatmap and pair plot.
 
-**Prerequisites**
+**Step 4 — Outlier handling**
+Identified three major outlier offenders from boxplot inspection:
+- `price`: removed listings priced at $0
+- `minimum_nights`: capped at 15 nights (IQR-based upper limit)
+- `number_of_reviews`: documented via IQR analysis
 
-Make sure you have Python 3.11+ installed on your machine. You will also need pip to install the Python packages.
+**Step 5 — Feature scaling**
+Applied `MinMaxScaler` to all numerical features: `number_of_reviews`, `minimum_nights`, `calculated_host_listings_count`, `availability_365`, `neighbourhood_group`, `room_type`.
 
-**Installation**
+**Step 6 — Feature selection**
+Used `SelectKBest` with chi-square scoring to identify the 4 features most predictive of price from the scaled feature set. Saved the final train/test splits as `data/processed/clean_train_data.csv` and `clean_test_data.csv`, ready for modeling.
 
-Clone the project repository to your local machine.
+## Results
 
-Navigate to the project directory and install the required Python packages:
+The EDA identified `neighbourhood_group` and `room_type` as the strongest categorical drivers of price — consistent with real-world intuition (Manhattan vs. the Bronx; entire home vs. shared room). The outlier-cleaned, feature-selected output dataset provides a clean foundation for a regression model predicting Airbnb listing price.
+
+## Tech stack
+
+`Python` · `pandas` · `NumPy` · `scikit-learn` · `Matplotlib` · `Seaborn`
+
+## Run it locally
 
 ```bash
+git clone https://github.com/matthewkane-ml/EDA_Project.git
+cd EDA_Project
 pip install -r requirements.txt
-```
 
-**Create a database (if necessary)**
-
-Create a new database within the Postgres engine by customizing and executing the following command:
-
-```bash
-$ psql -U postgres -c "DO \$\$ BEGIN 
-    CREATE USER my_user WITH PASSWORD 'my_password'; 
-    CREATE DATABASE my_database OWNER my_user; 
-END \$\$;"
-```
-Connect to the Postgres engine to use your database, manipulate tables, and data:
-
-```bash
-$ psql -U my_user -d my_database
-```
-
-Once inside PSQL, you can create tables, run queries, insert, update, or delete data, and much more!
-
-**Environment Variables**
-
-Create a .env file in the root directory of the project to store your environment variables, such as your database connection string:
-
-```makefile
-DATABASE_URL="postgresql://<USER>:<PASSWORD>@<HOST>:<PORT>/<DB_NAME>"
-
-#example
-DATABASE_URL="postgresql://my_user:my_password@localhost:5432/my_database"
-```
-
-## Running the Application
-
-To run the application, execute the app.py script from the root directory of the project:
-
-```bash
+# Add the raw dataset to data/raw/raw_data.csv, then run:
 python src/app.py
 ```
 
-## Adding Models
+## What I'd do next
 
-To add SQLAlchemy model classes, create new Python script files within the models/ directory. These classes should be defined according to your database schema.
+- Build a regression model (Linear Regression or Random Forest Regressor) on the cleaned output to actually predict listing price
+- Investigate geographic price patterns more deeply using latitude/longitude data and a map visualization (e.g., Folium or Plotly)
+- Perform a deeper outlier analysis on `price` — many NYC listings are legitimately expensive, so a hard IQR cap may remove valid data points
 
-Example model definition (`models/example_model.py`):
+---
 
-```py
-from sqlalchemy.orm import declarative_base
-from sqlalchemy import String
-from sqlalchemy.orm import Mapped, mapped_column
-
-Base = declarative_base()
-
-class ExampleModel(Base):
-    __tablename__ = 'example_table'
-    id: Mapped[int] = mapped_column(primary_key=True)
-    username: Mapped[str] = mapped_column(unique=True)
-```
-
-## Working with Data
-
-You can place your raw datasets in the data/raw directory, intermediate datasets in data/interim, and processed datasets ready for analysis in data/processed.
-
-To process data, you can modify the app.py script to include your data processing steps, using pandas for data manipulation and analysis.
-
-## Contributors
-
-This project is maintained by [matthewkane-ml](https://github.com/matthewkane-ml).
+**Author:** Matthew Kane — [LinkedIn](https://www.linkedin.com/in/thomas-kane-392094410/) · [GitHub portfolio](https://github.com/matthewkane-ml)

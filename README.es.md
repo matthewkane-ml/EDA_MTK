@@ -1,110 +1,68 @@
-# Plantilla de Proyecto de Ciencia de Datos
+# EDA de Precios de Airbnb en Nueva York
 
-Esta plantilla está diseñada para impulsar proyectos de ciencia de datos proporcionando una configuración básica para conexiones de base de datos, procesamiento de datos, y desarrollo de modelos de aprendizaje automático. Incluye una organización estructurada de carpetas para tus conjuntos de datos y un conjunto de paquetes de Python predefinidos necesarios para la mayoría de las tareas de ciencia de datos.
+> Análisis exploratorio de datos sobre los listados de Airbnb en la Ciudad de Nueva York — identificando las variables que más influyen en el precio de los alojamientos en los cinco condados.
 
-## Estructura
+---
 
-El proyecto está organizado de la siguiente manera:
+## Problema
 
-- **`src/app.py`** → Script principal de Python donde correrá tu proyecto.
-- **`src/explore.ipynb`** → Notebook para exploración y pruebas. Una vez finalizada la exploración, migra el código limpio a `app.py`.
-- **`src/utils.py`** → Funciones auxiliares, como conexión a bases de datos.
-- **`requirements.txt`** → Lista de paquetes de Python necesarios.
-- **`models/`** → Contendrá tus clases de modelos SQLAlchemy.
-- **`data/`** → Almacena los datasets en diferentes etapas:
-  - **`data/raw/`** → Datos sin procesar.
-  - **`data/interim/`** → Datos transformados temporalmente.
-  - **`data/processed/`** → Datos listos para análisis.
+¿Qué factores determinan el precio de un alojamiento en Airbnb en la Ciudad de Nueva York? Este proyecto realiza un EDA estructurado de extremo a extremo sobre los datos abiertos de Airbnb NYC para responder esa pregunta — limpiando los datos, explorando distribuciones y relaciones, gestionando valores atípicos y entregando un dataset con selección de características listo para modelado posterior.
 
+## Conjunto de datos
 
-## ⚡ Configuración Inicial en Codespaces (Recomendado)
+- **Fuente:** [NYC Airbnb Open Data](https://www.kaggle.com/datasets/dgomonov/new-york-city-airbnb-open-data) — Kaggle
+- **Características clave analizadas:** `neighbourhood_group`, `neighbourhood`, `room_type`, `price`, `minimum_nights`, `number_of_reviews`, `calculated_host_listings_count`, `availability_365`
+- **Eliminadas en limpieza:** `id`, `name`, `host_name`, `last_review`, `reviews_per_month` — no relevantes para la predicción de precios
+- **Variable objetivo:** `price`
 
-No es necesario realizar ninguna configuración manual, ya que **Codespaces se configura automáticamente** con los archivos predefinidos que ha creado la academia para ti. Simplemente sigue estos pasos:
+## Metodología
 
-1. **Espera a que el entorno se configure automáticamente**.
-   - Todos los paquetes necesarios y la base de datos se instalarán por sí mismos.
-   - El `username` y `db_name` creados automáticamente están en el archivo **`.env`** en la raíz del proyecto.
-2. **Una vez que Codespaces esté listo, puedes comenzar a trabajar inmediatamente**.
+**Paso 1 — Limpieza de datos**
+Se verificaron cero IDs duplicados y cero valores nulos en todas las columnas retenidas. Se eliminaron cinco columnas de identificadores y metadatos irrelevantes.
 
+**Paso 2 — Análisis univariante**
+Se graficaron histogramas y diagramas de caja para todas las variables numéricas (`price`, `minimum_nights`, `number_of_reviews`, `calculated_host_listings_count`) y distribuciones de conteo para variables categóricas (`neighbourhood_group`, `room_type`).
 
-## 💻 Configuración en Local (Solo si no puedes usar Codespaces)
+**Paso 3 — Análisis multivariante**
+Se construyeron gráficos de regresión y mapas de calor de correlación por pares para variables numéricas frente al precio. Se graficó el conteo de tipos de habitación desglosado por condado. Se factorizaron las columnas categóricas y se generó un mapa de calor de correlación completo y un pair plot.
 
-**Prerrequisitos**
+**Paso 4 — Gestión de valores atípicos**
+Se identificaron tres variables con mayores valores atípicos mediante inspección de boxplots:
+- `price`: eliminados listados con precio $0
+- `minimum_nights`: limitado a 15 noches (límite superior basado en IQR)
+- `number_of_reviews`: documentado mediante análisis IQR
 
-Asegúrate de tener Python 3.11+ instalado en tu máquina. También necesitarás pip para instalar los paquetes de Python.
+**Paso 5 — Escalado de características**
+Se aplicó `MinMaxScaler` a todas las variables numéricas: `number_of_reviews`, `minimum_nights`, `calculated_host_listings_count`, `availability_365`, `neighbourhood_group`, `room_type`.
 
-**Instalación**
+**Paso 6 — Selección de características**
+Se utilizó `SelectKBest` con puntuación chi-cuadrado para identificar las 4 características más predictivas del precio en el conjunto escalado. Se guardaron las divisiones finales entrenamiento/prueba como `data/processed/clean_train_data.csv` y `clean_test_data.csv`, listas para modelado.
 
-Clona el repositorio del proyecto en tu máquina local.
+## Resultados
 
-Navega hasta el directorio del proyecto e instala los paquetes de Python requeridos:
+El EDA identificó `neighbourhood_group` y `room_type` como los principales impulsores categóricos del precio — consistente con la intuición del mundo real (Manhattan vs. el Bronx; casa completa vs. habitación compartida). El dataset de salida limpio y con selección de características proporciona una base sólida para un modelo de regresión que prediga el precio de un listado de Airbnb.
+
+## Tecnologías utilizadas
+
+`Python` · `pandas` · `NumPy` · `scikit-learn` · `Matplotlib` · `Seaborn`
+
+## Ejecución local
 
 ```bash
+git clone https://github.com/matthewkane-ml/EDA_Project.git
+cd EDA_Project
 pip install -r requirements.txt
-```
 
-**Crear una base de datos (si es necesario)**
-
-Crea una nueva base de datos dentro del motor Postgres personalizando y ejecutando el siguiente comando: 
-
-```bash
-$ psql -U postgres -c "DO \$\$ BEGIN 
-    CREATE USER mi_usuario WITH PASSWORD 'mi_contraseña'; 
-    CREATE DATABASE mi_base_de_datos OWNER mi_usuario; 
-END \$\$;"
-```
-Conéctate al motor Postgres para usar tu base de datos, manipular tablas y datos: 
-
-```bash
-$ psql -U mi_usuario -d mi_base_de_datos
-```
-
-¡Una vez que estés dentro de PSQL podrás crear tablas, hacer consultas, insertar, actualizar o eliminar datos y mucho más!
-
-**Variables de entorno**
-
-Crea un archivo .env en el directorio raíz del proyecto para almacenar tus variables de entorno, como tu cadena de conexión a la base de datos:
-
-```makefile
-DATABASE_URL="postgresql://<USUARIO>:<CONTRASEÑA>@<HOST>:<PUERTO>/<NOMBRE_BD>"
-
-#example
-DATABASE_URL="postgresql://mi_usuario:mi_contraseña@localhost:5432/mi_base_de_datos"
-```
-
-## Ejecutando la Aplicación
-
-Para ejecutar la aplicación, ejecuta el script app.py desde la raíz del directorio del proyecto:
-
-```bash
+# Añade el dataset crudo a data/raw/raw_data.csv, luego ejecuta:
 python src/app.py
 ```
 
-## Añadiendo Modelos
+## Próximos pasos
 
-Para añadir clases de modelos SQLAlchemy, crea nuevos archivos de script de Python dentro del directorio models/. Estas clases deben ser definidas de acuerdo a tu esquema de base de datos.
+- Construir un modelo de regresión (Regresión Lineal o Random Forest Regressor) sobre los datos limpios para predecir efectivamente el precio del alojamiento
+- Investigar más a fondo los patrones geográficos de precios usando datos de latitud/longitud y una visualización de mapa (ej. Folium o Plotly)
+- Realizar un análisis más profundo de los valores atípicos en `price` — muchos alojamientos en NYC son legítimamente caros, por lo que un límite IQR estricto podría eliminar puntos de datos válidos
 
-Definición del modelo de ejemplo (`models/example_model.py`):
+---
 
-```py
-from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy import String
-from sqlalchemy.orm import Mapped, mapped_column
-
-Base = declarative_base()
-
-class ExampleModel(Base):
-    __tablename__ = 'example_table'
-    id: Mapped[int] = mapped_column(primary_key=True)
-    username: Mapped[str] = mapped_column(unique=True)
-```
-
-## Trabajando con Datos
-
-Puedes colocar tus conjuntos de datos brutos en el directorio data/raw, conjuntos de datos intermedios en data/interim, y los conjuntos de datos procesados listos para el análisis en data/processed.
-
-Para procesar datos, puedes modificar el script app.py para incluir tus pasos de procesamiento de datos, utilizando pandas para la manipulación y análisis de datos.
-
-## Contribuyentes
-
-Este proyecto es mantenido por [matthewkane-ml](https://github.com/matthewkane-ml).
+**Autor:** Matthew Kane — [LinkedIn](https://www.linkedin.com/in/thomas-kane-392094410/) · [Portafolio GitHub](https://github.com/matthewkane-ml)
