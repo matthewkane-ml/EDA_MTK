@@ -40,7 +40,16 @@ Used `SelectKBest` with chi-square scoring to identify the 4 features most predi
 
 ## Results
 
-The EDA identified `neighbourhood_group` and `room_type` as the strongest categorical drivers of price — consistent with real-world intuition (Manhattan vs. the Bronx; entire home vs. shared room). The outlier-cleaned, feature-selected output dataset provides a clean foundation for a regression model predicting Airbnb listing price.
+`SelectKBest` (chi-square, k=4) selected the following features as most predictive of price:
+
+| Selected | Dropped |
+|---|---|
+| `room_type` | `minimum_nights` |
+| `availability_365` | `neighbourhood_group` |
+| `number_of_reviews` | |
+| `calculated_host_listings_count` | |
+
+The two dropped features — `minimum_nights` and `neighbourhood_group` — had the lowest chi-square scores, suggesting they contribute less independent signal to price after scaling. Notably, `room_type` outranking `neighbourhood_group` implies that *what* you're renting is a stronger price driver than *where* it is, at least within this feature set. The outlier-cleaned, feature-selected output is saved to `data/processed/` as train and test CSVs, ready for a regression model.
 
 ## Tech stack
 

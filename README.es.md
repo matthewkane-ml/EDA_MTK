@@ -40,7 +40,16 @@ Se utilizó `SelectKBest` con puntuación chi-cuadrado para identificar las 4 ca
 
 ## Resultados
 
-El EDA identificó `neighbourhood_group` y `room_type` como los principales impulsores categóricos del precio — consistente con la intuición del mundo real (Manhattan vs. el Bronx; casa completa vs. habitación compartida). El dataset de salida limpio y con selección de características proporciona una base sólida para un modelo de regresión que prediga el precio de un listado de Airbnb.
+`SelectKBest` (chi-cuadrado, k=4) seleccionó las siguientes características como más predictivas del precio:
+
+| Seleccionadas | Descartadas |
+|---|---|
+| `room_type` | `minimum_nights` |
+| `availability_365` | `neighbourhood_group` |
+| `number_of_reviews` | |
+| `calculated_host_listings_count` | |
+
+Las dos características descartadas — `minimum_nights` y `neighbourhood_group` — tuvieron las puntuaciones chi-cuadrado más bajas, lo que sugiere que aportan menos señal independiente al precio después del escalado. Es destacable que `room_type` supere a `neighbourhood_group`, lo que implica que *qué* se alquila es un factor más determinante del precio que *dónde* está ubicado, al menos en este conjunto de características. La salida limpia y con selección de características se guarda en `data/processed/` como CSVs de entrenamiento y prueba, lista para un modelo de regresión.
 
 ## Tecnologías utilizadas
 
