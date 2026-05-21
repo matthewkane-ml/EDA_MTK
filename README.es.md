@@ -58,8 +58,8 @@ Las dos características descartadas — `minimum_nights` y `neighbourhood_group
 ## Ejecución local
 
 ```bash
-git clone https://github.com/matthewkane-ml/EDA_Project.git
-cd EDA_Project
+git clone https://github.com/matthewkane-ml/EDA_MTK.git
+cd EDA_MTK
 pip install -r requirements.txt
 
 # Añade el dataset crudo a data/raw/raw_data.csv, luego ejecuta:
@@ -74,4 +74,4 @@ python src/app.py
 
 ---
 
-**Autor:** Matthew Kane — [LinkedIn](https://www.linkedin.com/in/thomas-kane-392094410/) · [Portafolio GitHub](https://github.com/matthewkane-ml)
+**Autor:** Matthew Kane — [LinkedIn](https://www.linkedin.com/in/thomas-k-392094410/) · [Portafolio GitHub](https://github.com/matthewkane-ml)

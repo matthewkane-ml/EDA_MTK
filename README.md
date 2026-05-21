@@ -58,13 +58,18 @@ The two dropped features — `minimum_nights` and `neighbourhood_group` — had 
 ## Run it locally
 
 ```bash
-git clone https://github.com/matthewkane-ml/EDA_Project.git
-cd EDA_Project
+git clone https://github.com/matthewkane-ml/EDA_MTK.git
+cd EDA_MTK
 pip install -r requirements.txt
 
 # Add the raw dataset to data/raw/raw_data.csv, then run:
 python src/app.py
 ```
+
+## Screenshots
+
+![Univariate analysis — categorical features by borough and room type](screenshots/univariate_categorical.png)
+![Univariate analysis — numerical distributions and outlier boxplots](screenshots/univariate_numerical.png)
 
 ## What I'd do next
 
@@ -74,4 +79,4 @@ python src/app.py
 
 ---
 
-**Author:** Matthew Kane — [LinkedIn](https://www.linkedin.com/in/thomas-kane-392094410/) · [GitHub portfolio](https://github.com/matthewkane-ml)
+**Author:** Matthew Kane — [LinkedIn](https://www.linkedin.com/in/thomas-k-392094410/) · [GitHub portfolio](https://github.com/matthewkane-ml)

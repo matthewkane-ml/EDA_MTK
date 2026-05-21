@@ -1,15 +1,12 @@
-# Explore here
- 
 # # Step 1: Problem statement and data collection
 # # Problem statement: What factors influence the price of an Airbnb listing in New York City?"
  
-from utils import db_connect
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import os
  
-engine = db_connect()
+# engine = db_connect()  # DB connection not needed; data loaded from CSV
  
 # your code here
  
@@ -233,6 +230,15 @@ ix = selection_model.get_support()
  
 X_train_sel = pd.DataFrame(selection_model.transform(X_train), columns = X_train.columns.values[ix])
 X_test_sel = pd.DataFrame(selection_model.transform(X_test), columns = X_test.columns.values[ix])
+ 
+# Print selected features and their chi2 scores
+print("\n--- Feature Selection Results ---")
+print("Selected features:", list(X_train.columns.values[ix]))
+print("\nAll chi2 scores (ranked):")
+for feat, score in sorted(zip(X_train.columns, selection_model.scores_), key=lambda x: -x[1]):
+    marker = " <-- selected" if feat in X_train.columns.values[ix] else ""
+    print(f"  {feat}: {score:.2f}{marker}")
+print("---------------------------------\n")
  
 # Save the data
 X_train_sel["price"] = list(y_train)
