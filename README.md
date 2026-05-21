@@ -70,6 +70,9 @@ python src/app.py
 
 ![Univariate analysis — categorical features by borough and room type](screenshots/univariate_categorical.png)
 ![Univariate analysis — numerical distributions and outlier boxplots](screenshots/univariate_numerical.png)
+![Multivariate analysis — room type counts by borough](screenshots/multivariate_room_type_by_borough.png)
+![Correlation heatmap — all features](screenshots/correlation_heatmap.png)
+![Feature engineering — outlier boxplots before cleaning](screenshots/feature_engineering_boxplots.png)
 
 ## What I'd do next
 
